@@ -1,1 +1,52 @@
 #write a python class for extraction and visualization
+#  AP_WD; AP_BEAM_TIME; AP_IMAGE_PIXEL_SIZE; AP_HOLDER_HEIGHT, AP_BEAM_CURRENT, AP_HOLDER_DIAMETER
+import json
+import pandas as pd
+import numpy as np
+from PIL import Image
+
+class Visualizer():
+
+    features = ['AP_WD', 
+            'AP_BEAM_TIME', 
+            'AP_IMAGE_PIXEL_SIZE', 
+            'AP_HOLDER_HEIGHT', 
+            'AP_BEAM_CURRENT', 
+            'AP_HOLDER_DIAMETER']
+
+
+    def __init__(self, json_file, image_file):
+        self.json_file = json_file
+        self.image_file = image_file
+
+
+    def load_metadata(self):
+        print(f"Loading metadata from file {self.json_file}")
+        with open(self.json_file, 'r') as f:
+            data = json.load(f)
+            f.close()
+        self.metadata = data
+    
+
+    def print_features(self, features=features):
+        if hasattr(self, 'metadata'):
+            d = {f:self.metadata[f] for f in features}
+            table = pd.DataFrame.from_dict(d, orient='index')
+            print(table)
+        else:
+            raise Exception("No metadata loaded. Metadata must be load before")
+
+
+
+    def plot_image(self):
+
+        im = Image.open(self.image_file) 
+        imarray = np.array(im) 
+        imarray.shape 
+        im.show()
+        return im
+
+    
+
+
+
