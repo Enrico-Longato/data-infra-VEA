@@ -13,5 +13,5 @@ img.load_metadata()
 # print extracted feactures
 img.print_features()
 # plot the image
-i = img.plot_image()
+i = img.plot_image(how='matplotlib')
 

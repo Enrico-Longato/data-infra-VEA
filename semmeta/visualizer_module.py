@@ -4,6 +4,8 @@ import json
 import pandas as pd
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
+
 
 class Visualizer():
 
@@ -21,14 +23,26 @@ class Visualizer():
 
 
     def load_metadata(self):
+        '''
+        Load the metadata
+        '''
         print(f"Loading metadata from file {self.json_file}")
-        with open(self.json_file, 'r') as f:
-            data = json.load(f)
-            f.close()
+        try:
+            with open(self.json_file, 'r') as f:
+                data = json.load(f)
+                f.close()
+        except:
+            print(f"Could not read file: {self.json_file}")
+            return
+        
         self.metadata = data
     
 
     def print_features(self, features=features):
+        '''
+        Print the features from the loaded metadata
+        '''
+        
         if hasattr(self, 'metadata'):
             d = {f:self.metadata[f] for f in features}
             table = pd.DataFrame.from_dict(d, orient='index')
@@ -38,14 +52,25 @@ class Visualizer():
 
 
 
-    def plot_image(self):
+    def plot_image(self, how='pillow'):
+        '''
+        Plots the image
+        '''
+        try:
+            im = Image.open(self.image_file) 
+        except:
+            print(f"Could not read file: {self.image_file}")  
+            return
 
-        im = Image.open(self.image_file) 
         imarray = np.array(im) 
-        imarray.shape 
-        im.show()
-        return im
-
+        if how=='pillow':
+            im.show()
+        elif how=='matplotlib':
+            plt.imshow(imarray)
+            plt.show()
+        else:
+            raise Exception("how must be either pillow or matplotlib")
+        
     
 
 
