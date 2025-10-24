@@ -1,4 +1,7 @@
-#write python class that read a .tif file
+#=====================================================
+# Emmanuel Nyandu Kagarabi/enyanduk@sissa.it
+#=====================================================
+
 #write python class that read a .tif file
 import os, sys, glob
 import matplotlib.pyplot as plt
@@ -10,9 +13,12 @@ import json
 
 class SEMMetaData:
     def __init__(self, image_metadata={}, semext=('tif','TIF'), semInsTag=[34118]):
-        #semext is a tuple corresponding to the valid extension, 34118 is a TIFF tag ofte used by SEM instruments to store extra data
-        #define  the following attributes: semext, image_megadata, semInsTag, images_tags (array to store image tag values)
-
+        #semext is a tuple corresponding to the valid extension, 34118 is a TIFF tag often used by SEM instruments to store extra data
+        #Let's define  the following attributes: semext, image_megadata, semInsTag, images_tags (array to store image tag values)
+        self.semext = semext
+        self.image_metadata = image_metadata
+        self.semInsTag = semInsTag
+        self.image_tags = []
 
 
     def OpenCheckImage(self, image):
@@ -20,6 +26,18 @@ class SEMMetaData:
         Opens an image file with PILLOW library (Image.open()) and verifies accessibility and format (.tif or .TIF)
         return the opened image object if succesful
         """
+        if not os.path.exists(image):
+            raise FileNotFoundError(f"File {image} not found.")
+        
+        ext = os.path.splitext(image)[1][1:]  # get extension (without dot)
+        if ext not in self.semext:
+            raise ValueError(f"Invalid image format: {ext}. Expected one of {self.semext}.")
+        
+        try:
+            img = Image.open(image)
+            return img
+        except Exception as e:
+            raise IOError(f"Cannot open image: {e}")
 
 
     def ImageMetadata(self, img):
@@ -95,17 +113,38 @@ class SEMMetaData:
             - list: a cleaned and escaped list of instrument metadata strings.
             - and an empty list if tag 34118 is not found.
         '''
+        if self.semInsTag[0] in self.image_metadata:
+            try:
+                raw_data = self.image_metadata[self.semInsTag[0]][0]
+                if isinstance(raw_data, bytes):
+                    raw_data = raw_data.decode(errors='ignore')
+                clean_list = [line.strip() for line in raw_data.split('\n') if line.strip()]
+                return clean_list
+            except Exception as e:
+                print(f"Error reading instrument metadata: {e}")
+                return []
+        else:
+            return []
 
 
     def InsMetaDict(self, list):   
-
         '''
         write  function that converts a flat list of instrument metadata into a structured dictionary.
         Returns:
             - dict: of all the information contained in the 34118 tag  
             - and an empty dictionary if parsing fails.  
-     
         '''
+        ins_dict = {}
+        try:
+            for item in list:
+                if "=" in item:
+                    key, value = item.split("=", 1)
+                    ins_dict[key.strip()] = value.strip()
+            return ins_dict
+        except Exception as e:
+            print(f"Error converting instrument metadata to dict: {e}")
+            return {}
+
 
     # Open file in write mode and Export SEM Metadata to JSON Format with json.dump
     def WriteSEMJson(self,file, semdict):
