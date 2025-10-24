@@ -1,5 +1,5 @@
 import json
-import os
+
 
 class JsonCleaner:
     def __init__(self, input_path):
@@ -19,13 +19,7 @@ class JsonCleaner:
             json.dump(cleaned_data, f, indent=4, ensure_ascii=False)
 
         print(f"File successfully saved in: {self.output_path}")
-output_dir = "output"
- 
-for filename in os.listdir(output_dir):
-    if filename.endswith("_raw.json"):
-        input_path = os.path.join(output_dir, filename)
-        cleaner = JsonCleaner(input_path=input_path)
-        cleaner.clean_json()
+
  
 
 
